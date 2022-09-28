@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FlaskApp</title>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.2/plyr.css" />
+    <script src="https://cdn.plyr.io/3.7.2/plyr.polyfilled.js"></script>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.2/demo.css" />
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+  
+</head>
+<body style="background-color: rgb(51, 51, 51);">
+  <video id="player"  preload="none"  playsinline controls settings data-plyr-config='{ "title": "Example Title" }' style="width: 100%; object-fit: cover;">
+  <source id="videoPlayerSource" src="https://youtubemusic.songlinhou.repl.co/video?url=https://www.youtube.com/watch?v=TcpDNqkxMHY" type="video/mp4" />
+
+  <!-- Captions are optional -->
+  
+  </video>  
+  
+<!--   <script src="https://cdn.plyr.io/3.7.2/demo.js" crossorigin="anonymous"></script> -->
+  <script src="src/videoPlayer.js" crossorigin="anonymous"></script>
+  <script>
+    $(document).ready((event)=>{
+      console.log("document ready");
+
+      setTimeout(()=>{
+        let player = $('#player')[0];
+        if(player.paused){
+            // $("button.plyr__control")[0].click();
+            console.log("auto play");
+        }
+      }, 500);
+      
+    });
+    
+    
+  </script>
+</body>
+</html>

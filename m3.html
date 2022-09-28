@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+    <script src="src/base64-binary.js"></script>
+    <script src="src/music-base64.js"></script>
+
+
+</head>
+
+<script>
+
+let currentIdx = 0;
+let myAudioContext;
+
+function log(...s){
+    $("#info").html(s);
+    console.log(s);
+}
+
+
+function playNext(){
+    // pauseAll();
+    $("#songInfo").html(currentIdx);
+    let sound = songBase64[currentIdx];
+    let buff = Base64Binary.decodeArrayBuffer(sound);
+    log("buff=", buff);
+    myAudioContext.decodeAudioData(buff, function(audioData) {
+        let myBuffer = audioData;
+        log("myBuffer=", myBuffer);
+        playBuffer(myBuffer);
+    });
+    currentIdx ++;
+}
+
+function playBuffer(myBuffer){
+    try{
+        log("playBuffer");
+        log("playBuffer");
+        mySource = myAudioContext.createBufferSource();
+        mySource.buffer = myBuffer;
+        mySource.connect(myAudioContext.destination);
+        mySource.noteOn(0);
+
+    }
+    catch(e){
+        log(e);
+    }
+    
+}
+
+$(document).ready(()=>{
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    myAudioContext = new AudioContext();
+
+    $("#start").on("click",(e)=>{
+        playNext();
+    });
+
+    // await getAudios();
+
+});
+
+        
+
+
+    </script>
+
+
+
+</head>
+<body onload="">
+    <button id="start">Start</button>
+    <div id="songInfo">Show id here</div>
+    <div id="info"></div>
+
+    <audio id="audio"></audio>
+
+</body>
+</html>

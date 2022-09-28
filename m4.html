@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="src/music-base64.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+
+</head>
+<body>
+    <button id="start">Start</button>
+    <div id="songInfo">Show id here</div>
+    <div id="info"></div>
+
+    <audio id="audio"></audio>
+    
+</body>
+
+
+<script>
+let audios = [];
+        let currentIdx = 0;
+        function getAudios(){
+            console.log("getting audios");
+            for(let i=0; i< urls.length; i++){
+                let url = urls[i];
+                url = "https://youtubemusic.songlinhou.repl.co/music_url?url=" + url;
+                let audio = new Audio(url);
+                audio.load();
+                audios.push(audio);
+            }
+        }
+
+        function pauseAll(){
+            for(let i=0; i< urls.length; i++){
+                let audio = audios[i];
+                if(!audio.paused){
+                    console.log("pause " + i);
+                    audio.pause();
+                }
+            }
+        }
+
+        function playNext(){
+            // pauseAll();
+            $("#songInfo").html(currentIdx);
+            $("#audio").attr("src", "data:audio/mp4;base64," + songBase64[currentIdx]);
+            $("#audio")[0].load();
+            $("#audio")[0].play();
+            currentIdx ++;
+            currentIdx %= 3;
+        }
+
+        $(document).ready(()=>{
+            $("#start").on("click",(e)=>{
+                playNext();
+            });
+
+            // await getAudios();
+
+        });
+
+        
+
+
+    </script>
+
+
+
+</head>
+</html>

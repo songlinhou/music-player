@@ -1,0 +1,80 @@
+.music-container
+{
+    width: 350px;
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 25%;
+    transform: translate(-50%, -50%);
+    background-color: red;
+}
+
+.music-img
+{
+    height: 350px;
+    background-size: cover;
+    background-position: center;
+    background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),url('../album-cover.jpg');
+    color: #fff;
+}
+
+.music-img .fa-angle-left
+{
+    float: left;
+    margin-top: 15px;
+    margin-left: 10px;
+}
+
+div#timeline1 {
+    width: 100%;
+    background: gray;
+    display: block;
+    height: 4px;
+    border-radius: 5px;
+}
+
+div#seekObj1 {
+    width: 5px;
+    height: 5px;
+    background: #fff;
+    border-radius: 50%;
+    
+}
+
+.user-menu
+{
+    height: 60px;
+    font-family: sans-serif;
+    background-color: #000;
+    line-height: 25px;
+}
+
+.fixed-bottom{
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1030;
+}
+
+.nav-btn-text{
+    margin-bottom: 8px;
+}
+
+body{
+    margin:0px;
+    padding: 0px;
+}
+
+.modal-dialog {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+  
+  .modal-content {
+    margin: 0 auto;
+  }
+
+  /* disable pull to refresh */
