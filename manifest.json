@@ -3,12 +3,12 @@
     "name": "Music Player",
     "icons": [
       {
-        "src": "/img/icons-128.png",
+        "src": "/img/icon-128.png",
         "type": "image/png",
         "sizes": "128x128"
       },
       {
-        "src": "/img/icons-512.png",
+        "src": "/img/icon-512.png",
         "type": "image/png",
         "sizes": "512x512"
       }

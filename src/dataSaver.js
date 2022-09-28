@@ -3,6 +3,7 @@ const db = new Dexie("MusicDB");
 function initDatabase(){
     db.version(1).stores({
         likedSongs: `
+            code,
             url,
             name,
             artist,
@@ -54,5 +55,29 @@ async function getLikedSongFromDB(url){
     console.log("get song data", song);
     return song;
 }
+
+
+function downloadMusic(code) { 
+    var xhr = new XMLHttpRequest();
+    let url = generateMusicLink(code);
+    xhr.open('GET', url, true);
+    xhr.responseType = 'blob';
+    xhr.onload = function(e) {
+      if (this.status == 200) {
+        var myBlob = this.response;
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(myBlob);
+        link.download = `${code}.mp4`;
+        link.click();
+      }
+    };
+    xhr.send();
+  }
+
+
+async function deleteMusic(code){
+    await db.likedSongs.where('code').equals(code).delete();  
+}
+
 
 // 'name': 'SoundHelix Song 1', 'artist': 'T. Schürger 1', 'image': 'https://i.ytimg.com/vi/Y0pdQU87dc8/sddefault.jpg', 'url':'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 'desc': 'Desc 1'

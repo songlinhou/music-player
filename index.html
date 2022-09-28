@@ -35,6 +35,7 @@
         <script src="src/itemGenerator.js"></script>
         <script src="src/dataSaver.js"></script>
         <script src="src/music-base64.js"></script>
+        <script src="src/utils.js"></script>
 
     </head>
     <body style="background-color: black; padding-top:30px;" class="body">
@@ -303,7 +304,7 @@
                     <b>Play All</b>
                 </div>
                 <div class="col d-flex justify-content-center">
-                    <b>Shuffled Play</b>
+                    <b style="color: gray;">Shuffled Play</b>
                 </div>
             </div>
 
@@ -373,7 +374,7 @@
                     <i class="fa fa-home"></i><p class="nav-btn-text">Home</p>
                 </div>
 
-                <div class="col bottom-nav-btn" id="playlist-nav-btn">
+                <div class="col bottom-nav-btn" id="playlist-nav-btn" style="color: white;">
                     <i class="fa fa-music"></i><p class="nav-btn-text">Playlist</p>
                 </div>
 
@@ -467,7 +468,8 @@ let playlistData = [
 
 let viewingPlaylistData = []; // user can browse play list without changing current one.
 
-let currentIdxInPlayList = 0;
+let currentIdxInPlayList = -1;
+let lastIdxInPlayList = -1;
 // let currentViewingPageId = "main-home-container";
 let currentViewingPageId = "playlist-combined-container";
 let height;
@@ -485,6 +487,7 @@ let useMusicBase64 = false;
 let preventAutoPlayNextSong = false;
 let currentSongFinished = false;
 let playerInit = false;
+let currentPlayingSongCode = null;
 
 const performanceStats = {};
 
@@ -532,7 +535,8 @@ function generateSongHTMLInPlaylist(playlistData){
     let html = "";
     for(let i=0; i < playlistData.length; i++){
         const rec = playlistData[i];
-        html += getSongItemHTML(i, rec.name, rec.artist, rec.image)
+        rec.url
+        html += getSongItemHTML(i, rec.name, rec.artist, rec.image, rec.code)
     }
     $("#playlist-songitem-list").html(html);
 }
@@ -580,7 +584,7 @@ $(window).on("load", async function () {
     // await playOnlinePlayList(); // this is working
 
     
-    // await addSampleSongsToDB();
+    await addSampleSongsToDB();
     await obtainLikedSongsPlayList();
 
 
@@ -588,7 +592,7 @@ $(window).on("load", async function () {
 
 
 
-    await obtainPlayList();
+    // await obtainPlayList();
 
     // testClick();
 
@@ -662,33 +666,7 @@ function setupBottomNav(){
 
     $("#float-player-left").on("click", (e) => {
         // show the main play window
-        doPlayerInitOnClick();
-        console.log("click player");
-        $('.player-panel').fadeIn();
-
-        let mainSongCoverMaxHeight = screen.height - 450;
-        console.log("mainSongCoverMaxHeight=", mainSongCoverMaxHeight );
-        $("#main-song-cover").css("height", mainSongCoverMaxHeight + "px");
-        $("#main-song-cover").css("width", mainSongCoverMaxHeight + "px");
-
-        $("#main-song-cover2").css("height", mainSongCoverMaxHeight + "px");
-        $("#main-song-cover2").css("width", mainSongCoverMaxHeight + "px");
-
-        $("#videoPlayerIFrame").css("height", mainSongCoverMaxHeight + "px");
-        $("#videoPlayerIFrame").css("width", "100%");
-        // $("#videoPlayerIFrame").contents().find("#player").css("height", mainSongCoverMaxHeight - 50 + "px");
-        
-
-
-        $(".main-page").fadeOut("slow");
-        $("#main-play-container").hide();
-        $("#main-play-container").removeClass("d-none");
-        $("#main-play-container").fadeIn("slow");
-
-        // hide the mini-player
-        $("#float-player").hide();
-        $("#float-player").fadeIn("slow");
-        $("#float-player").addClass("d-none");
+        showMainPlayerWindow();
     });
 
     $("#main-song-cover").on("click", (e) =>{
@@ -780,15 +758,41 @@ function setupBottomNav(){
     });
 
     
-    $("#search-nav-btn").on("click", async ()=>{
-        doPlayerInitOnClick();
-        console.log("click #search-nav-btn");
-        $("#player2").attr("src", "data:audio/mp4;base64," + songBase64[currentIdx]);
-        $("#player2")[0].load();
-        $("#player2")[0].play();
-        currentIdx ++;
-        currentIdx %= 3;
-    });
+
+    
+
+}
+
+
+
+function showMainPlayerWindow(){
+    doPlayerInitOnClick();
+    console.log("click player");
+    $('.player-panel').fadeIn();
+
+    let mainSongCoverMaxHeight = screen.height - 450;
+    console.log("mainSongCoverMaxHeight=", mainSongCoverMaxHeight );
+    $("#main-song-cover").css("height", mainSongCoverMaxHeight + "px");
+    $("#main-song-cover").css("width", mainSongCoverMaxHeight + "px");
+
+    $("#main-song-cover2").css("height", mainSongCoverMaxHeight + "px");
+    $("#main-song-cover2").css("width", mainSongCoverMaxHeight + "px");
+
+    $("#videoPlayerIFrame").css("height", mainSongCoverMaxHeight + "px");
+    $("#videoPlayerIFrame").css("width", "100%");
+    // $("#videoPlayerIFrame").contents().find("#player").css("height", mainSongCoverMaxHeight - 50 + "px");
+    
+
+
+    $(".main-page").fadeOut("slow");
+    $("#main-play-container").hide();
+    $("#main-play-container").removeClass("d-none");
+    $("#main-play-container").fadeIn("slow");
+
+    // hide the mini-player
+    $("#float-player").hide();
+    $("#float-player").fadeIn("slow");
+    $("#float-player").addClass("d-none");
 }
 
 async function attemptClipboardURL(){
@@ -1012,23 +1016,11 @@ function startPlaySong(url, name, artist, image, desc="No information found", le
     $("#mini-progress-bar").css("width", "0%");
     var progressbar = document.getElementById("seekObj1");
     progressbar.style.marginLeft = "0px";
-
-    // playBtn.addClass("fa-circle-pause");
-    // playBtn.removeClass("fa-circle-play");
     updatePlayBtn(true);
 
     player1.load();
 
-    // if(onIOS){
-    //     playSongOnIOSEmbed(url);
-    //     return;
-    // }
-
     if(playImmediately){
-        // if(onIOS){
-        //     console.log("cannot play on IOS");
-        //     return;
-        // }
         setTimeout(() => {
             console.log("now playing " + name);
             isLoadingNow = true;
@@ -1044,42 +1036,8 @@ function startPlaySong(url, name, artist, image, desc="No information found", le
         }, 500);
 
     }
-    
-    
-    // isPlaying = True;
 }
 
-
-// function playSongOnIOS(){
-//     if(!isOnIOS()){
-//         console.log("not on IOS");
-//         // return;
-//     }
-//     let url = playURLs.urls[currentIdxInPlayList];
-//     let videoURL = `https://youtubemusic.songlinhou.repl.co/video?url=${url}`;
-//     let $iframe = $("#videoPlayerIFrame").contents();
-//     $iframe.find("#videoPlayerSource").attr("src", videoURL)
-//     let player = $iframe.find("#player")[0]
-//     setTimeout(()=>{
-//         player.load();
-//         // $("#videoPlayerIFrame").click();
-//     }, 1000);
-// }
-
-// function playSongOnIOSEmbed(url){
-//     if(!isOnIOS()){
-//         // alert("not on IOS");
-//         console.log("not on IOS");
-//         return;
-//     }
-//     console.log("playSongOnIOSEmbed, url=",url);
-//     let code = url.split("v=")[1].split("&")[0];
-//     let embedURL = `https://www.youtube.com/embed/${code}`;
-//     // let embedURL = `https://www.youtube.com/watch?v=${code}&autoplay=1&mute=0&controls=0`;
-
-//     let $iframe = $("#videoPlayerIFrame").attr("src", embedURL)
-//     $("#videoPlayerIFrame")[0].contentWindow.location.reload();
-// }
 
 async function loadSongFromPlaylist(id, playImmediately=true){
     // might need to check if it is the same song
@@ -1087,12 +1045,27 @@ async function loadSongFromPlaylist(id, playImmediately=true){
         console.log("playlist_data is not available");
         return;
     }
-    $("#player2")[0].pause();
     let songData = playlistData[id];
+    if(!currentPlayingSongCode){
+        currentPlayingSongCode = getVideoCode(songData['original_url']);
+    }
+    else if(getVideoCode(songData['original_url']) == currentPlayingSongCode){
+        showMainPlayerWindow();
+        console.log("load the playing song. show mini player instead.");
+        return;
+    }
+    $("#player2")[0].pause();
+
+    
+    console.log("setting color");
+    $('.song-item-row').css("background-color", "#000");
+    $(`[song-idx=${id}]`).parent().closest('.song-item-row').css("background-color", "#222");
+
     setTimeout(()=>{
         avoidFastClick = false;
         logDebug("****** now click is enabled");
     }, 2000);
+    currentPlayingSongCode = getVideoCode(songData['original_url']);
     if(useMusicBase64){
         let originalURL = songData['original_url'];
         console.log("requesting base64 for song", songData['name']);
@@ -1175,7 +1148,11 @@ async function obtainPlayList(){
         playlistData = viewingPlaylistData;
         currentIdxInPlayList = idx;
         await loadSongFromPlaylist(currentIdxInPlayList, true);
+        // $('.song-item-row').css("background-color", "#000");
+        // $idItem.parent().closest('.song-item-row').css("background-color", "#222");
     });
+    defineSongOperations();
+
 }
 
 let avoidFastClick = false;
@@ -1202,7 +1179,8 @@ async function obtainLikedSongsPlayList(){
             return;
         }
         console.log("target=", $(e.target));
-        let $idItem = $(e.target).parent().closest('.song-click-area'); 
+        let $idItem = $(e.target).parent().closest('.song-click-area');
+         
         let idx = parseInt($idItem.attr("song-idx"));
         console.log(`click song ${idx} to play`);
 
@@ -1219,7 +1197,56 @@ async function obtainLikedSongsPlayList(){
         }
         
     });
+    defineSongOperations();
 }
+
+function defineSongOperations(){
+    $(".song-dropdown-btn").off("click");
+    $(".song-dropdown-btn").on("click", (e)=>{
+        doPlayerInitOnClick();
+        let $target = $(e.target).parent().closest('.song-item');
+        let code = $target.attr('code');
+        console.log("operation target=", $target, "code=", code);
+        console.log("click on", e.target);
+        // let $btnTarget = $(e.target).parent().closest('.song-dropdown-btn');
+        let $btnTarget = $(e.target);
+
+        
+
+        let action = $btnTarget.attr("action-type");
+        console.log("btnTarget=", $btnTarget);
+        console.log("action=", action);
+        
+        if(action == "copy-youtube"){
+            copyYTLink(code);
+        }
+        else if(action == "copy-player"){
+            copyPlayerLink(code);
+        }
+        else if(action == "download"){
+            downloadMusic(code);
+        }
+        else if(action == "delete"){
+            deleteMusic(code);
+            $(`.song-item[code=${code}]`).fadeOut();
+            setTimeout(()=>{
+                $(`.song-item[code=${code}]`).remove();
+            }, 1000);
+        }
+    });
+}
+
+function copyYTLink(code){
+    let yt = generateYTVideoLink(code);
+    navigator.clipboard.writeText(yt);
+    alert("copied");
+}
+
+function copyPlayerLink(code){
+    alert("coming soon...");
+}
+
+
 
 
 async function addSampleSongsToDB(){
