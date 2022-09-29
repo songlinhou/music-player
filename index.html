@@ -45,7 +45,7 @@
             <div class="row main-play-horizontal-btn">
                 
                 <div class="d-flex justify-content-center">
-                <div style="height: 4px; width:36px; border-radius: 2px; background-color: rgb(138, 138, 138);"></div>
+                <div style="height: 4px; width:36px; border-radius: 2px; background-color: #bbb;" id="main-play-top-line"></div>
                     </div>
             </div>
             <div class="main-play-horizontal-btn" style="height: 20px;"></div>
@@ -74,7 +74,7 @@
                 </div>
 
                 <div class="col">
-                    <div class="d-flex justify-content-end" style="color: white;">
+                    <div class="d-flex justify-content-end" style="color: #888;">
                         <i class="fa-regular fa-heart"></i>
                     </div>
                 </div>
@@ -102,7 +102,7 @@
                     <div class="audio-wrapper">
                         <audio id="player2" preload="none">
                               <!-- <source id="player-source" src="http://d2cstorage-a.akamaihd.net/wbr/gotnext/8578.mp3" type="audio/mp3"> -->
-                              <source id="player-source" src="https://youtubemusic.songlinhou.repl.co/music_url?url=https://www.youtube.com/watch?v=944qO4mPdaY" type="audio/mp4">
+                              <source id="player-source" type="audio/mp4">
 
                         </audio>
                     </div>
@@ -134,7 +134,7 @@
 
             <div class="row" style="margin-top: 24px; color:white;">
                 <div class="d-flex align-items-center">
-                <div class="col">
+                <div class="col" id="main-player-download-btn">
                     <div class="d-flex justify-content-center">
                     <i class="fa-solid fa-cloud-arrow-down"></i></div></div>
                 <div class="col">
@@ -148,7 +148,7 @@
                     <i class="fa-solid fa-forward-step" id="next-song-btn"></i></div></div>
                 <div class="col">
                     <div class="d-flex justify-content-center">
-                    <i class="fa-solid fa-list"></i></div></div>
+                    <i class="fa-solid fa-list" style="color:#888"></i></div></div>
                     </div>
             </div>
 
@@ -300,10 +300,10 @@
             </div>
 
             <div class="row" style="margin-top: 24px;">
-                <div class="col d-flex justify-content-center" id="playlist-playall-btn">
+                <div class="col d-flex justify-content-center" id="playlist-playall-btn" style="padding-top: 6px;padding-bottom: 6px;">
                     <b>Play All</b>
                 </div>
-                <div class="col d-flex justify-content-center">
+                <div class="col d-flex justify-content-center" style="padding-top: 6px;padding-bottom: 6p">
                     <b style="color: gray;">Shuffled Play</b>
                 </div>
             </div>
@@ -355,7 +355,7 @@
                     <div class="col">
                         <div class="d-flex justify-content-end" style="margin-bottom: 6px; margin-top: 6px;">
                             <div style="color: white; margin-top: 10px;" ><i class="fa-solid fa-play fa-xl main-play-btn" id="mini-play-btn"></i></div>
-                            <div style="color: white; margin-top: 10px; margin-left: 30px;" ><i class="fa-regular fa-heart fa-xl"></i></div>
+                            <div style="color: #888; margin-top: 10px; margin-left: 30px;" ><i class="fa-regular fa-heart fa-xl"></i></div>
                         </div>
                     </div>
                 </div>
@@ -369,20 +369,20 @@
 
 
 
-            <div class="row" style="padding-top: 8px; background-color:#333; border-radius: 0px; color: #888; ">
-                <div class="col bottom-nav-btn" id="home-nav-btn">
+            <div class="row" style="background-color:#333; border-radius: 0px; color: #888; ">
+                <div class="col bottom-nav-btn" id="home-nav-btn" style="padding-top: 8px;">
                     <i class="fa fa-home"></i><p class="nav-btn-text">Home</p>
                 </div>
 
-                <div class="col bottom-nav-btn" id="playlist-nav-btn" style="color: white;">
+                <div class="col bottom-nav-btn" id="playlist-nav-btn" style="color: white; padding-top: 8px;">
                     <i class="fa fa-music"></i><p class="nav-btn-text">Playlist</p>
                 </div>
 
-                <div class="col bottom-nav-btn" id="search-nav-btn">
+                <div class="col bottom-nav-btn" id="search-nav-btn" style="padding-top: 8px;">
                     <i class="fa-solid fa-magnifying-glass"></i><p class="nav-btn-text">Search</p>
                 </div>
 
-                <div class="col bottom-nav-btn">
+                <div class="col bottom-nav-btn" style="padding-top: 8px;">
                     <i class="fa fa-user"></i><p class="nav-btn-text">User</p>
                 </div>
             </div>
@@ -400,7 +400,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="exampleFormControlInput1" class="form-label">YouTube Link</label>
-                        <input class="form-control" id="url-add-input" placeholder="https://www.youtube.com/watch?v=Dzea8kRsFCI">
+                        <input class="form-control" id="url-add-input" placeholder="https://www.youtube.com/watch?v=****">
                         <small id="error-in-adding-link" style="color: red" class="d-none">Not a valid YouTube video link.</small>
                       </div>
                 </div>
@@ -589,6 +589,8 @@ $(window).on("load", async function () {
 
 
     getUserClickOnScreen();
+    onHoverChangeColor();
+    hideMiniPlayerWhenLaunched();
 
 
 
@@ -711,6 +713,16 @@ function setupBottomNav(){
         showMiniPlayer();
     });
 
+    // $("#main-player-download-btn").on("click", (e) => {
+    //     doPlayerInitOnClick();
+    //     if(!currentPlayingSongCode || currentPlayingSongCode == null){
+    //         downloadMusic(currentPlayingSongCode);
+    //     }
+    //     else{
+    //         console.log("no song is selected.");
+    //     }
+    // });
+
     // play list (liked songs)
     $("#playlist-playall-btn").on("click",async (e)=>{
         doPlayerInitOnClick();
@@ -742,6 +754,8 @@ function setupBottomNav(){
         let possibleURL = await attemptClipboardURL();
         let url = $("#url-add-input").val(possibleURL);
     });
+
+    onHoverChangeColor();
     
     // add URL modal
     $("#comfirm-add-url-btn").on("click", confirmAddURL);
@@ -756,17 +770,21 @@ function setupBottomNav(){
             await playViewingPlayList();
         }
     });
+}
 
-    
-
-    
-
+function hideMiniPlayerWhenLaunched(){
+    if(!currentPlayingSongCode){
+        $("#float-player").addClass("d-none");
+        $("#float-player").hide();
+        $("#float-player").removeClass("d-none");
+    }
 }
 
 
 
 function showMainPlayerWindow(){
     doPlayerInitOnClick();
+    onHoverChangeColor();
     console.log("click player");
     $('.player-panel').fadeIn();
 
@@ -799,6 +817,9 @@ async function attemptClipboardURL(){
     let text = await navigator.clipboard.readText();
     text = text.trim();
     if (text.indexOf("watch?v=") > 0){
+        return text;
+    }
+    if (text.startsWith("https://youtu.be/")){
         return text;
     }
     return '';
@@ -869,6 +890,7 @@ function testPlayMusic(){
 
 function onClickPlaylist() {
     console.log("onClickPlaylist");
+    onHoverChangeColor();
     currentViewingPageId = "playlist-combined-container";
     $(".main-page").fadeOut("slow");
     $("#playlist-combined-container").hide();
@@ -953,6 +975,7 @@ function startPlaySongBase64(url, name, artist, image, desc="No information foun
 
     $("#main-song-cover2").css("background-image", `linear-gradient(rgba(0, 0, 0, 0.8), rgba(0,0,0,0.8)), url('${image}')`);
     $("#main-song-cover2").css("background-size", 'cover');
+    $("#main-song-cover2").scrollTop(0); // set description scrollbar to top
 
 
 
@@ -1010,6 +1033,7 @@ function startPlaySong(url, name, artist, image, desc="No information found", le
 
     $("#main-song-cover2").css("background-image", `linear-gradient(rgba(0, 0, 0, 0.8), rgba(0,0,0,0.8)), url('${image}')`);
     $("#main-song-cover2").css("background-size", 'cover');
+    $("#main-song-cover2").scrollTop(0); // set description scrollbar to top
 
 
 
@@ -1038,6 +1062,29 @@ function startPlaySong(url, name, artist, image, desc="No information found", le
     }
 }
 
+function onHoverChangeColor(){
+    console.log("onHoverChangeColor called");
+    $(".song-item").hover(function(){
+         $(this).css("background-color", "#222");
+         $(".song-item").css("cursor", "pointer");
+        }, 
+         function(){
+             $(this).css("background-color", "");
+             $(".song-item").css("cursor", "");
+    });
+    $(".main-play-horizontal-btn").hover(()=>{
+        $("#main-play-top-line").css(
+            "background-color", "#ddd"
+        );
+        $("#main-play-top-line").css("cursor", "pointer");
+    },()=>{
+        $("#main-play-top-line").css(
+            "background-color", "#bbb"
+        );
+        $("#main-play-top-line").css("cursor", "");
+    });
+}
+
 
 async function loadSongFromPlaylist(id, playImmediately=true){
     // might need to check if it is the same song
@@ -1055,11 +1102,11 @@ async function loadSongFromPlaylist(id, playImmediately=true){
         return;
     }
     $("#player2")[0].pause();
-
+    // onHoverChangeColor();
     
     console.log("setting color");
-    $('.song-item-row').css("background-color", "#000");
-    $(`[song-idx=${id}]`).parent().closest('.song-item-row').css("background-color", "#222");
+    $('.song-item-row').css("background-color", "");
+    $(`[song-idx=${id}]`).parent().closest('.song-item-row').css("background-color", "#333");
 
     setTimeout(()=>{
         avoidFastClick = false;
@@ -1145,6 +1192,7 @@ async function obtainPlayList(){
         let $idItem = $(e.target).parent().closest('.song-click-area'); 
         let idx = parseInt($idItem.attr("song-idx"));
         console.log(`click song ${idx} to play`);
+        showMiniPlayer();
         playlistData = viewingPlaylistData;
         currentIdxInPlayList = idx;
         await loadSongFromPlaylist(currentIdxInPlayList, true);
@@ -1183,7 +1231,7 @@ async function obtainLikedSongsPlayList(){
          
         let idx = parseInt($idItem.attr("song-idx"));
         console.log(`click song ${idx} to play`);
-
+        showMiniPlayer();
         playlistData = viewingPlaylistData;
         currentIdxInPlayList = idx;
         

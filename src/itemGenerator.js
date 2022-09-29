@@ -1,6 +1,6 @@
 function getSongItemHTML(idx, name, artist, image, code){
     let html = `<div class="song-item" style="margin-bottom: 12px;" code="${code}">
-    <div class="row song-item-row">
+    <div class="row song-item-row" style="padding-top: 6px;padding-bottom: 6px;">
         <div class="col-10">
             <div class="d-flex justify-content-left song-click-area" song-idx="${idx}">
             <img style="border-radius: 12%; height: 45px; width: 45px; object-fit:cover; padding: 0px; margin-left: 12px;" src="${image}">

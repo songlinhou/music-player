@@ -77,4 +77,45 @@ body{
     margin: 0 auto;
   }
 
+  #float-player-left:hover {
+    cursor: pointer;
+}
+
+#mini-play-btn:hover {
+    cursor: pointer;
+}
+
+.bottom-nav-btn:hover {
+    cursor: pointer;
+    background-color: #444;
+}
+
+#playlist-playall-btn:hover {
+    cursor: pointer;
+    background-color: #444;
+}
+
+#add-to-playlist-btn:hover {
+    cursor: pointer;
+}
+
+#return-to-playlist-btn:hover {
+    cursor: pointer;
+}
+
+#major-play-btn:hover {
+    cursor: pointer;
+}
+
+#prev-song-btn:hover {
+    cursor: pointer;
+}
+
+#next-song-btn:hover {
+    cursor: pointer;
+}
+
+
+
+
   /* disable pull to refresh */
