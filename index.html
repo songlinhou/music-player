@@ -39,8 +39,6 @@
 
     </head>
     <body style="background-color: black; padding-top:30px;" class="body">
-        <div class="wrapper">
-        
         <div id="main-play-container" class="d-none container main-page" style="background-color:#333; padding-top: 5px; border-radius: 20px;">
             <div class="row main-play-horizontal-btn">
                 
@@ -388,6 +386,7 @@
             </div>
         </div>
 
+
         <!-- modals -->
 
         <div class="modal fade" id="add-to-playlist-modal" tabindex="-1" aria-hidden="true">
@@ -418,7 +417,7 @@
 
           <div class="modal fade" id="ios-enter-modal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
-              <div class="modal-content">
+              <!-- <div class="modal-content">
                 <div class="modal-header">
                   <h5 class="modal-title">Compatibility Mode</h5>
                   <button type="button" class="btn-close" aria-label="Close" id="enter-modal-close-btn"></button>
@@ -431,11 +430,12 @@
                 <div class="modal-footer">
                   <button type="button" class="btn btn-primary" id="screen-enter-btn">Enter</button>
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
 
 
+        <!-- <div style="width: 100%; height: 100vh; background-color: #0000008a; position:absolute; top:0px; right: 0px;"></div> -->
 
         </div>
 
@@ -578,7 +578,7 @@ $(window).on("load", async function () {
 
     // generateSongHTMLInPlaylist(playlistData);
 
-    // window.addEventListener('visibilitychange', onPageHide, false);
+    window.addEventListener('visibilitychange', onPageHide, false);
 
     // requestMusicItemListData(playURLs);
     // await playOnlinePlayList(); // this is working
@@ -601,11 +601,12 @@ $(window).on("load", async function () {
     // loadDogSound('https://youtubemusic.songlinhou.repl.co/music_url?url=https://www.youtube.com/watch?v=944qO4mPdaY');
 });
 
-// function onPageHide(e){
-//     var player = $("#player2")[0];
-//   //alert(player);
-//     player.play();
-// }
+function onPageHide(e){
+    var player = $("#player2")[0];
+    if(player.paused){
+        logDebug("player is paused");
+    }
+}
 
 // function iosLimitationUI(){
 //     if(onIOS){
@@ -619,30 +620,49 @@ $(window).on("load", async function () {
 //     }
 // }
 
-
+function initPlayer(){
+    if(!useMusicBase64){
+        return;
+    }
+    if(playerInit){
+        return;
+    }
+    $("#player2").attr("src", "data:audio/mp4;base64," + noticeSound);
+    $("#player2")[0].load();
+    $("#player2")[0].play();
+    $("#ios-enter-modal").modal('hide');
+    logDebug("iOS player inited.");
+    playerInit = true;
+}
+var isDragging = false;
 function getUserClickOnScreen(){
     if(!useMusicBase64){
         return;
     }
     $("#ios-enter-modal").modal({backdrop: 'static', keyboard: false});
     $("#ios-enter-modal").modal('show');
-    $("#screen-enter-btn").off("click");
-    $("#screen-enter-btn").on("click", (e)=>{
-        $("#player2").attr("src", "data:audio/mp4;base64," + noticeSound);
-        $("#player2")[0].load();
-        $("#player2")[0].play();
-        $("#ios-enter-modal").modal('hide');
-        logDebug("iOS player inited.");
-        playerInit = true;
-    });
-    $("#enter-modal-close-btn").on("click", (e)=>{
-        $("#player2").attr("src", "data:audio/mp4;base64," + noticeSound);
-        $("#player2")[0].load();
-        $("#player2")[0].play();
-        $("#ios-enter-modal").modal('hide');
-        logDebug("iOS player inited.");
-        playerInit = true;
-    });
+
+    $("#ios-enter-modal").off("click");
+    $("#ios-enter-modal").on("click", (e)=>{initPlayer();});
+    $("#ios-enter-modal").on("mousedown", (e)=>{initPlayer();});
+
+    // $("#screen-enter-btn").off("click");
+    // $("#screen-enter-btn").on("click", (e)=>{
+    //     $("#player2").attr("src", "data:audio/mp4;base64," + noticeSound);
+    //     $("#player2")[0].load();
+    //     $("#player2")[0].play();
+    //     $("#ios-enter-modal").modal('hide');
+    //     logDebug("iOS player inited.");
+    //     playerInit = true;
+    // });
+    // $("#enter-modal-close-btn").on("click", (e)=>{
+    //     $("#player2").attr("src", "data:audio/mp4;base64," + noticeSound);
+    //     $("#player2")[0].load();
+    //     $("#player2")[0].play();
+    //     $("#ios-enter-modal").modal('hide');
+    //     logDebug("iOS player inited.");
+    //     playerInit = true;
+    // });
 }
 
 
@@ -704,13 +724,28 @@ function setupBottomNav(){
 
     $(".main-play-horizontal-btn").on("click", (e) => {
         doPlayerInitOnClick();
-        $(".main-page").fadeOut("slow");
-        let lastPageId = "#" + currentViewingPageId;
-        $(lastPageId).hide();
-        $(lastPageId).removeClass("d-none");
-        $(lastPageId).fadeIn("slow");
+        
+        
+        $("#main-play-container").animate({
+            opacity: 0,
+            marginTop: '-200px',
+        }, 'slow', 'linear', function(){
+            // $(this).hide();
+            $(".main-page").fadeOut("slow");
 
-        showMiniPlayer();
+            let lastPageId = "#" + currentViewingPageId;
+            $(lastPageId).hide();
+            $(lastPageId).removeClass("d-none");
+            $(lastPageId).fadeIn("slow");
+
+            showMiniPlayer();
+            // setting back container info
+            $(this).hide();
+            $("#main-play-container").css("opacity", "100");
+            $("#main-play-container").css("margin-top", "0px");
+
+        });
+        
     });
 
     // $("#main-player-download-btn").on("click", (e) => {
@@ -781,7 +816,6 @@ function hideMiniPlayerWhenLaunched(){
 }
 
 
-
 function showMainPlayerWindow(){
     doPlayerInitOnClick();
     onHoverChangeColor();
@@ -811,6 +845,21 @@ function showMainPlayerWindow(){
     $("#float-player").hide();
     $("#float-player").fadeIn("slow");
     $("#float-player").addClass("d-none");
+
+    // opacity: 100; margin-top: 0px;
+
+    // $(".main-page").fadeOut("slow");
+    // $("#main-play-container").show();
+    // $("#main-play-container").css("margin-top", "-200px");
+    // $("#main-play-container").animate({
+    //         opacity: 100,
+    //         marginTop: '0px',
+    //     }, 'slow', 'linear', function(){
+    //         // hide the mini-player
+    //         $("#float-player").hide();
+    //         $("#float-player").fadeIn("slow");
+    //         $("#float-player").addClass("d-none");
+    //     });
 }
 
 async function attemptClipboardURL(){
