@@ -12,7 +12,7 @@
 </head>
 <body>
     
-    <div id="login">
+    <div id="loginScreen">
         <button id="login">Login with Google</button>
     </div>
 
@@ -43,37 +43,67 @@
             const app = firebase.initializeApp(firebaseConfig);
             $("#login").on("click",()=>{
                 googleLogin();
-                firebase.auth().signInWithPopup(provider)
-                .then(res=>{
-                    console.log(res);
-                    let userID = res.user.displayName;
-                    let email = res.user.email;
-                    let photoURL = res.user.photoURL;
-
-                    $("#userID").html(userID);
-                    $("#email").html(email);
-                    $("#photo").attr("src", photoURL);
-
-                })
-                .catch(e=>{
-                    console.log("Error=", e);
-                    $("#error").html("" + e);
-                });
             });
 
             $("#logout").on("click",()=>{
                 googleLogout();
             });
 
-            function googleLogin(){
-                console.log("login");
-            }
-
-            function googleLogout(){
-                console.log("logout");
-            }
+            checkAuthState();
 
         });
+
+        function googleLogin(){
+            console.log("login");
+            firebase.auth().signInWithPopup(provider)
+            .then(res=>{
+                console.log(res);
+                showUserDashboard(res.user);
+            })
+            .catch(e=>{
+                console.log("Error=", e);
+                $("#error").html("" + e);
+            });
+        }
+
+        function googleLogout(){
+
+            console.log("logout");
+            firebase.auth().signOut().then(()=>{
+                showLogin();
+            })
+            .catch(e=>{
+                console.log("Error=", e);
+                $("#error").html("" + e);
+            });
+        }
+
+        function showUserDashboard(user){
+            let userID = user.displayName;
+            let email = user.email;
+            let photoURL = user.photoURL;
+            $("#loginScreen").hide();
+            $("#dashboard").show();
+            $("#userID").html(userID);
+            $("#email").html(email);
+            $("#photo").attr("src", photoURL);
+        }
+
+        function showLogin(){
+            $("#loginScreen").show();
+            $("#dashboard").hide();
+        }
+
+        function checkAuthState(){
+            firebase.auth().onAuthStateChanged(user=>{
+                if(user){
+                    showUserDashboard(user);
+                }
+                else{
+                    showLogin();
+                }
+            })
+        }
         
 
       </script>
