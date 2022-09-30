@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+
+    <title>Document</title>
+</head>
+<body>
+    
+    <div id="login">
+        <button id="login">Login with Google</button>
+    </div>
+
+    <div id="dashboard">
+        <div id="userID"></div>
+        <div id="email"></div>
+        <img id="photo" src="" style="width:64px">
+        <button id="logout">Logout</button>
+    </div>
+
+    <div id="error"></div>
+
+    <script>
+        
+        const firebaseConfig = {
+          apiKey: "AIzaSyCZmI21jpt4QNDuP70PhLzum4fgF8yKxcM",
+          authDomain: "music-player-premium.firebaseapp.com",
+          projectId: "music-player-premium",
+          storageBucket: "music-player-premium.appspot.com",
+          messagingSenderId: "717948093311",
+          appId: "1:717948093311:web:516d5deccfed469c2b104a"
+        };
+
+        const provider = new firebase.auth.GoogleAuthProvider();
+      
+        // Initialize Firebase
+        $(document).ready(()=>{
+            const app = firebase.initializeApp(firebaseConfig);
+            $("#login").on("click",()=>{
+                googleLogin();
+                firebase.auth().signInWithPopup(provider)
+                .then(res=>{
+                    console.log(res);
+                    let userID = res.user.displayName;
+                    let email = res.user.email;
+                    let photoURL = res.user.photoURL;
+
+                    $("#userID").html(userID);
+                    $("#email").html(email);
+                    $("#photo").attr("src", photoURL);
+
+                })
+                .catch(e=>{
+                    console.log("Error=", e);
+                    $("#error").html("" + e);
+                });
+            });
+
+            $("#logout").on("click",()=>{
+                googleLogout();
+            });
+
+            function googleLogin(){
+                console.log("login");
+            }
+
+            function googleLogout(){
+                console.log("logout");
+            }
+
+        });
+        
+
+      </script>
+</body>
+</html>
