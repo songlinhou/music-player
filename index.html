@@ -12,7 +12,8 @@
         <meta name="theme-color" content="#444" />
         <link href="css/style.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
-        <script src="https://kit.fontawesome.com/eb0c496755.js" crossorigin="anonymous"></script>
+        <!-- <script src="https://kit.fontawesome.com/eb0c496755.js" crossorigin="anonymous"></script> -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js"></script>
         <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
@@ -79,15 +80,17 @@
 
             </div>
 
-            <div class="row" style="margin-top: 15px;">
+            <div class="row" style="margin-top: 15px;" id="main-player-title-row">
                 <div class="d-flex align-items-center">
                 <div class="col" id="main-player-title-scroll-row">
-                    <div class="d-flex justify-content-start"> <marquee width="300" direction="left" style="color: white;" class="h5 song-name">No song is playing</marquee> </div>
+                    <div class="d-flex justify-content-start"> <marquee width="100" direction="left" style="color: white;" class="h5 song-name" id="main-scrolling-title">No song is playing</marquee> </div>
                 </div>
 
                 <div class="col-2">
-                    <div class="d-flex justify-content-end" style="color: #888;">
-                        <i class="fa-regular fa-heart fa-xl heart-btn" style="margin-right: 16px;"></i>
+                    <div class="d-flex justify-content-end align-items-center">
+                        <input type="range" class="form-range" id="volume-control-player-main" style="margin-right: 12px;" value="100">
+                        <i id="main-play-volume-btn" class="fa-solid fa-volume-high fa-xl" style="margin-right: 16px; color: #888; width: 30px;"></i>
+                        <i class="fa-regular fa-heart fa-xl heart-btn" style="margin-right: 16px; color: white;"></i>
                     </div>
                 </div>
             </div>
@@ -396,7 +399,7 @@
             <!-- setting items here -->
         </div>
     </div>
-    <div style="margin-top: 100px;"></div>
+    <div style="margin-top: 150px;"></div>
 
     </div>
 
@@ -671,7 +674,7 @@ $(window).on("load", async function () {
     
     setupAuth();
     initFirestore();
-
+    fixPlayerResize();
     // getOnlineLikedSongs();
 
     if(showInAppDebug){
@@ -861,6 +864,41 @@ function setupBottomNav(){
         
     });
 
+    $("#main-player-title-row").hover(()=>{
+        // on hover
+        let width = $(window).width();
+        if(width > 995){
+            $("#volume-control-player-main").show();
+        }
+        else{
+            $("#volume-control-player-main").hide();
+        }
+        $("#main-play-volume-btn").css("color", '#fff');
+        
+    },()=>{
+        $("#volume-control-player-main").fadeOut();
+        $("#main-play-volume-btn").css("color", '#888');
+    });
+
+    $("#volume-control-player-main").hide();
+
+    $("#volume-control-player-main").on("input change", ()=>{
+        let volume = parseFloat($("#volume-control-player-main").val());
+        let player = $("#player2")[0];
+        player.volume = volume / 100;
+        changeVolumeIcon(volume);
+    });
+
+    $("#main-play-volume-btn").on("click", ()=>{
+        console.log("setting to preset volume");
+        let player = $("#player2")[0];
+        let playerVol = player.volume * 100;
+        let newVol = getPrefixedVolume(playerVol);
+        player.volume = newVol / 100;
+        $("#volume-control-player-main").val(newVol);
+        changeVolumeIcon(newVol);
+    });
+
     // $("#main-player-download-btn").on("click", (e) => {
     //     doPlayerInitOnClick();
     //     if(!currentPlayingSongCode || currentPlayingSongCode == null){
@@ -971,6 +1009,10 @@ function setupBottomNav(){
         }
     });
 }
+
+
+
+
 let lastSearchTimestamp = null;
 async function onStartNewSearch(){
     doPlayerInitOnClick();
@@ -1104,6 +1146,23 @@ async function showMainPlayerWindow(){
     $("#float-player").fadeIn("slow");
     $("#float-player").addClass("d-none");
 
+    // set width of scrolling title
+    
+    $("#main-scrolling-title").attr("width","0px");
+    setTimeout(()=>{
+        let titleWidth = $("#main-player-title-scroll-row").width() - 60;
+        console.log("titleWidth=", titleWidth);
+        $("#main-scrolling-title").attr("width", titleWidth + "px");
+    }, 1000);
+    
+    // show volume control
+    let width = $(window).width();
+    if(width > 995){
+        $("#volume-control-player-main").show();
+    }
+    else{
+        $("#volume-control-player-main").hide();
+    }
 
     await defineLikeButton();
     // opacity: 100; margin-top: 0px;
@@ -1685,6 +1744,7 @@ function updateViewingPlaylist(){
 let searchPageIdx = 0;
 async function generateSearchResults(keyword){
     toggleSearchLoadingSpinner(true);
+    $(window).scrollTop(0);
     $("#search-results").addClass("d-none");
     $("#load-more-search-btn").addClass("d-none");
     let searchItems = await requestMusicSearchResults(keyword, searchPageIdx);
