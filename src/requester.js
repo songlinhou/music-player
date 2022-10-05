@@ -69,3 +69,33 @@ async function getMusicBase64(yt_url){
       return null;
   }
 }
+
+async function requestMusicSearchResults(keyword, page){
+  try{
+    let url = `${base_url}/search_result_list`;
+    const body = {
+      'keyword': keyword,
+      'page': page
+    }
+    const resp = await fetch(url, {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        mode: 'cors', // no-cors, *cors, same-origin
+        cache: 'default', // *default, no-cache, reload, force-cache, only-if-cached
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        redirect: 'follow', // manual, *follow, error
+        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(body) // body data type must match "Content-Type" header
+      });
+
+    const data= await resp.json();
+    console.log(data);
+    return data
+  }
+  catch(e){
+      console.log("Error in getting search results", e);
+      return null;
+  }
+  
+}

@@ -76,7 +76,25 @@ function downloadMusic(code) {
 
 
 async function deleteMusic(code){
-    await db.likedSongs.where('code').equals(code).delete();  
+    console.log("start delete", code);
+    await db.likedSongs.where('code').equals(code).delete();
+    await deleteLikedSongInRemoteStore(code);
+    console.log("deleteMusic complete", code);
+}
+
+async function deleteManyMusic(codes){
+    for(let i=0; i < codes.length; i ++){
+        const code = codes[i];
+        await deleteMusic(code);
+    }
+
+    console.log("delete songs from db. num=", codes.length);
+}
+
+async function deleteAllLikedSongsLocally(){
+    console.log("start delete all local songs");
+    await db.likedSongs.clear();
+    console.log("delete all local songs complete");
 }
 
 

@@ -114,6 +114,14 @@ body{
     cursor: pointer;
 }
 
+.setting-item:hover {
+    cursor: pointer;
+}
+
+#user-login-google:hover {
+    cursor: pointer;
+}
+
 
 
 

@@ -14,3 +14,14 @@ function generateMusicLink(code){
     let yt = generateYTVideoLink(code);
     return `${base_url}/music_url?url=${yt}`;
 }
+
+function getTimestampNow(){
+    let time = Date.now();
+    try {
+        time = firebase.firestore.FieldValue.serverTimestamp();
+        return time;
+    } catch (error) {
+        console.log("cannot get timestamp from firebase:", error);
+    }
+    return time;
+}
