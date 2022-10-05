@@ -87,7 +87,7 @@
 
                 <div class="col-2">
                     <div class="d-flex justify-content-end" style="color: #888;">
-                        <i class="fa-regular fa-heart heart-btn" style="margin-right: 16px;"></i>
+                        <i class="fa-regular fa-heart fa-xl heart-btn" style="margin-right: 16px;"></i>
                     </div>
                 </div>
             </div>
@@ -245,7 +245,7 @@
 
         </div>
 
-        <div class="main-page d-none" id="playlist-combined-container">
+        <div class="main-page" id="playlist-combined-container">
         <div id="main-playlist-container" class="container  d-none" style="padding-top: 0px;color: #fff;  padding-left: 20px;">
             <div class="row">
                 <div class="col d-flex justify-content-left">
@@ -332,7 +332,7 @@
         </div>
     </div>
 
-    <div class="main-page container" id="search-container" style="color: white;">
+    <div class="main-page container d-none" id="search-container" style="color: white;">
         <div class="row">
             <div class="col d-flex justify-content-left">
                 <i class="fa-solid fa-magnifying-glass fa-xl" style="padding-top: 12px;padding-left: 12px;"></i>
@@ -420,7 +420,7 @@
                     <div class="col">
                         <div class="d-flex justify-content-end" style="margin-bottom: 6px; margin-top: 6px;">
                             <div style="color: white; margin-top: 10px;" ><i class="fa-solid fa-play fa-xl main-play-btn" id="mini-play-btn"></i></div>
-                            <div style="color: #888; margin-top: 10px; margin-left: 30px;" ><i class="fa-regular fa-heart fa-xl heart-btn"></i></div>
+                            <!-- <div style="color: #888; margin-top: 10px; margin-left: 30px;" ><i class="fa-regular fa-heart fa-xl heart-btn"></i></div> -->
                         </div>
                     </div>
                 </div>
@@ -537,6 +537,10 @@ let playlistData = [
 ]; // must sync with playURLs
 
 let viewingPlaylistData = []; // user can browse play list without changing current one.
+
+//saved playlists
+let likedPlaylist = [];
+let searchPlaylist = [];
 
 let currentIdxInPlayList = -1;
 let lastIdxInPlayList = -1;
@@ -670,10 +674,9 @@ $(window).on("load", async function () {
 
     // getOnlineLikedSongs();
 
-
-    eruda.init();
-
-
+    if(showInAppDebug){
+        eruda.init();
+    }
 
     // await obtainPlayList();
 
@@ -757,22 +760,27 @@ function setupBottomNav(){
         // showMiniPlayer();
         // clearBottomNavBtnStyle();
         // $("#home-nav-btn").css("color","white");
+        avoidFastClick = false;
     });
 
-    $("#playlist-nav-btn").on("click", (e) => {
+    $("#playlist-nav-btn").on("click", async (e) => {
         doPlayerInitOnClick();
         onClickPlaylist();
-        showMiniPlayer();
+        await showMiniPlayer();
         clearBottomNavBtnStyle();
+        updateViewingPlaylist();
         $("#playlist-nav-btn").css("color","white");
+        avoidFastClick = false;
     });
 
-    $("#search-nav-btn").on("click", (e) => {
+    $("#search-nav-btn").on("click", async (e) => {
         doPlayerInitOnClick();
         onClickSearch();
-        showMiniPlayer();
+        await showMiniPlayer();
         clearBottomNavBtnStyle();
+        updateViewingPlaylist();
         $("#search-nav-btn").css("color","white");
+        avoidFastClick = false;
     });
 
     $("#user-nav-btn").on("click", (e) => {
@@ -780,12 +788,14 @@ function setupBottomNav(){
         onClickUser();
         clearBottomNavBtnStyle();
         $("#user-nav-btn").css("color","white");
+        avoidFastClick = false;
     });
     
 
-    $("#float-player-left").on("click", (e) => {
+    $("#float-player-left").on("click", async (e) => {
         // show the main play window
-        showMainPlayerWindow();
+        await showMainPlayerWindow();
+        avoidFastClick = false;
     });
 
     $("#main-song-cover").on("click", (e) =>{
@@ -826,7 +836,7 @@ function setupBottomNav(){
         $("#main-play-container").animate({
             opacity: 0,
             marginTop: '-200px',
-        }, 'slow', 'linear', function(){
+        }, 'slow', 'linear', async function(){
             // $(this).hide();
             $(".main-page").fadeOut("slow");
 
@@ -835,13 +845,14 @@ function setupBottomNav(){
             $(lastPageId).removeClass("d-none");
             $(lastPageId).fadeIn("slow");
 
-            showMiniPlayer();
+            await showMiniPlayer();
             // setting back container info
             $(this).hide();
             $("#main-play-container").css("opacity", "100");
             $("#main-play-container").css("margin-top", "0px");
 
         });
+        avoidFastClick = false;
         
     });
 
@@ -858,6 +869,7 @@ function setupBottomNav(){
     // play list (liked songs)
     $("#playlist-playall-btn").on("click",async (e)=>{
         doPlayerInitOnClick();
+        updateViewingPlaylist();
         if(viewingPlaylistData.length > 0){
             await playViewingPlayList();
         }
@@ -934,7 +946,7 @@ function setupBottomNav(){
         var keycode = (event.keyCode ? event.keyCode : event.which);
         if(keycode == '13'){
             await onStartNewSearch();
-
+            avoidFastClick = false;
         }
     });
 
@@ -942,13 +954,15 @@ function setupBottomNav(){
         let spinnerHidden = $("#loading-indicator").hasClass("d-none");
         if(spinnerHidden){
             await onStartNewSearch();
+            avoidFastClick = false;
         }
     });
 
     $("#load-more-search-btn").on("click", async ()=>{
         let spinnerHidden = $("#loading-indicator").hasClass("d-none");
         if(spinnerHidden){
-            await onStartNewSearch();
+            await onNextSearchPage();
+            avoidFastClick = false;
         }
     });
 }
@@ -1012,11 +1026,8 @@ function hideMiniPlayerWhenLaunched(){
     }
 }
 
-function defineLikeButton(){
-    if(!currentPlayingSongCode){
-        console.log("currentPlayingSongCode is null");
-        return;
-    }
+async function defineLikeButton(){
+    currentLikedSongCodes = await getCurrentLocalLikedSongCodes();
     $(".heart-btn").off("click");
     let alreadyLiked = currentLikedSongCodes.includes(currentPlayingSongCode);
     if(alreadyLiked){
@@ -1030,22 +1041,33 @@ function defineLikeButton(){
     $(".heart-btn").on("click", async ()=>{
         if(alreadyLiked){
             // remove from the likedList
+            if(!currentPlayingSongCode){
+                console.log("currentPlayingSongCode is null");
+                return;
+            }
             await deleteMusic(currentPlayingSongCode);
             $(".heart-btn").removeClass("fa-solid");
             $(".heart-btn").addClass("fa-regular");
         }
         else{
             // add to likedList
+            if(!currentPlayingSongCode){
+                console.log("currentPlayingSongCode is null");
+                return;
+            }
             let item = playlistData[currentIdxInPlayList];
             await addOneRecordToLikedSongs(item);
             console.log("add to liked songs");
             $(".heart-btn").removeClass("fa-regular");
             $(".heart-btn").addClass("fa-solid");
         }
+        await obtainLikedSongsPlayList();
+        // update the codes
+        currentLikedSongCodes = await getCurrentLocalLikedSongCodes();
     });
 }
 
-function showMainPlayerWindow(){
+async function showMainPlayerWindow(){
     doPlayerInitOnClick();
     onHoverChangeColor();
     console.log("click player");
@@ -1066,6 +1088,7 @@ function showMainPlayerWindow(){
 
 
     $(".main-page").fadeOut("slow");
+    $("#main-play-container").css("opacity", 100);
     $("#main-play-container").hide();
     $("#main-play-container").removeClass("d-none");
     $("#main-play-container").fadeIn("slow");
@@ -1076,7 +1099,7 @@ function showMainPlayerWindow(){
     $("#float-player").addClass("d-none");
 
 
-    defineLikeButton();
+    await defineLikeButton();
     // opacity: 100; margin-top: 0px;
 
     // $(".main-page").fadeOut("slow");
@@ -1136,13 +1159,14 @@ async function confirmAddURL(){
     }
 }
 
-function showMiniPlayer(){
+async function showMiniPlayer(){
     // show mini-player
     // $('#playlist-nav-btn')[0].classList.contains('col')
     if($("#float-player").is(':hidden')){
         $("#float-player").hide();
         $("#float-player").removeClass("d-none");
         $("#float-player").fadeIn();
+        await defineLikeButton();
     }
 }
 
@@ -1390,15 +1414,20 @@ async function loadSongFromPlaylist(id, playImmediately=true){
         return;
     }
     currentLikedSongCodes = await getCurrentLocalLikedSongCodes();
+    
     let songData = playlistData[id];
     if(!currentPlayingSongCode){
         currentPlayingSongCode = getVideoCode(songData['original_url']);
+        await defineLikeButton();
     }
     else if(getVideoCode(songData['original_url']) == currentPlayingSongCode){
-        showMainPlayerWindow();
+        await showMainPlayerWindow();
+        await defineLikeButton();
         console.log("load the playing song. show mini player instead.");
         return;
     }
+    
+    console.log("currentPlayingSongCode=", currentPlayingSongCode);
     $("#player2")[0].pause();
     // onHoverChangeColor();
     
@@ -1473,33 +1502,34 @@ function closeDropdown(){
     $('.dropdown-menu').removeClass('show');
 }
 
-async function obtainPlayList(){
-    let playListItems = await requestMusicItemListData(playURLs);
-    viewingPlaylistData = playListItems;
-    generateSongHTMLInPlaylist(viewingPlaylistData);
-    $('.song-click-area').off("click");
-    $('.song-click-area').on("click",async (e)=>{
-        let dropdownVisible = isDropdownVisible();
-        if(dropdownVisible){
-            console.log("dismiss the dropdown");
-            closeDropdown();
-            e.preventDefault();
-            return;
-        }
-        console.log("target=", $(e.target));
-        let $idItem = $(e.target).parent().closest('.song-click-area'); 
-        let idx = parseInt($idItem.attr("song-idx"));
-        console.log(`click song ${idx} to play`);
-        showMiniPlayer();
-        playlistData = viewingPlaylistData;
-        currentIdxInPlayList = idx;
-        await loadSongFromPlaylist(currentIdxInPlayList, true);
-        // $('.song-item-row').css("background-color", "#000");
-        // $idItem.parent().closest('.song-item-row').css("background-color", "#222");
-    });
-    defineSongOperations();
+// async function obtainPlayList(){
+//     let playListItems = await requestMusicItemListData(playURLs);
+//     viewingPlaylistData = playListItems;
+//     generateSongHTMLInPlaylist(viewingPlaylistData);
+//     $('.song-click-area').off("click");
+//     $('.song-click-area').on("click",async (e)=>{
+//         let dropdownVisible = isDropdownVisible();
+//         if(dropdownVisible){
+//             console.log("dismiss the dropdown");
+//             closeDropdown();
+//             e.preventDefault();
+//             return;
+//         }
+//         console.log("target=", $(e.target));
+//         let $idItem = $(e.target).parent().closest('.song-click-area'); 
+//         let idx = parseInt($idItem.attr("song-idx"));
+//         console.log(`click song ${idx} to play`);
+//         showMiniPlayer();
+//         updateViewingPlaylist();
+//         playlistData = viewingPlaylistData;
+//         currentIdxInPlayList = idx;
+//         await loadSongFromPlaylist(currentIdxInPlayList, true);
+//         // $('.song-item-row').css("background-color", "#000");
+//         // $idItem.parent().closest('.song-item-row').css("background-color", "#222");
+//     });
+//     defineSongOperations();
 
-}
+// }
 
 let avoidFastClick = false;
 async function obtainLikedSongsPlayList(){
@@ -1512,11 +1542,12 @@ async function obtainLikedSongsPlayList(){
         return;
     }
     $("#numberOfLikedSongs").html(`${numLikedSongs} songs available`);
-
+    likedPlaylist = playListItems;
     viewingPlaylistData = playListItems;
     generateSongHTMLInPlaylist(viewingPlaylistData);
     $('.song-click-area').off("click");
     $('.song-click-area').on("click",async (e)=>{
+        updateViewingPlaylist();
         let dropdownVisible = isDropdownVisible();
         if(dropdownVisible){
             console.log("dismiss the dropdown");
@@ -1529,11 +1560,14 @@ async function obtainLikedSongsPlayList(){
          
         let idx = parseInt($idItem.attr("song-idx"));
         console.log(`click song ${idx} to play`);
-        showMiniPlayer();
+        currentLikedSongCodes = getCurrentLocalLikedSongCodes();
+        await defineLikeButton();
+        await showMiniPlayer();
         playlistData = viewingPlaylistData;
         currentIdxInPlayList = idx;
         
         if(avoidFastClick){
+            console.log("cancelled because avoidFastClick is true")
             return;
         }
         if(!avoidFastClick){
@@ -1592,11 +1626,9 @@ function copyPlayerLink(code){
     alert("coming soon...");
 }
 
-
-
-
 async function addSampleSongsToDB(){
     let playListItems = await getAllLikedSongs();
+    likedPlaylist = playListItems;
     if(playListItems.length > 0){
         console.log('already have some liked songs. skip...');
         return;
@@ -1627,26 +1659,42 @@ function toggleSearchLoadingSpinner(show){
     }
 }
 
-
+function updateViewingPlaylist(){
+    if($(".liked-item").is(":visible")){
+        viewingPlaylistData = likedPlaylist;
+        console.log("now using liked songs as view list");
+        return;
+    }
+    if($(".search-item").is(":visible")){
+        viewingPlaylistData = searchPlaylist;
+        console.log("now using searched songs as view list");
+        return;
+    }
+}
 
 let searchPageIdx = 0;
 async function generateSearchResults(keyword){
     toggleSearchLoadingSpinner(true);
     $("#search-results").addClass("d-none");
+    $("#load-more-search-btn").addClass("d-none");
     let searchItems = await requestMusicSearchResults(keyword, searchPageIdx);
+    searchPlaylist = searchItems;
     let html = "";
     for(let i=0; i < searchItems.length; i++){
         const rec = searchItems[i];
-        html += getSongItemHTML(i, rec.name, rec.artist, rec.image, rec.code, false);
+        html += getSongItemHTML(i, rec.name, rec.artist, rec.image, rec.code, false, "search-item");
     }
     $("#search-songitem-list").html(html);
     $("#search-results").removeClass("d-none");
+    $("#load-more-search-btn").removeClass("d-none");
     toggleSearchLoadingSpinner(false);
     $(window).scrollTop(0);
 
-    viewingPlaylistData = searchItems;
+    // viewingPlaylistData = searchItems;
     $('.song-click-area').off("click");
     $('.song-click-area').on("click",async (e)=>{
+        await defineLikeButton();
+        updateViewingPlaylist()
         let dropdownVisible = isDropdownVisible();
         if(dropdownVisible){
             console.log("dismiss the dropdown");
@@ -1659,7 +1707,7 @@ async function generateSearchResults(keyword){
          
         let idx = parseInt($idItem.attr("song-idx"));
         console.log(`click song ${idx} to play`);
-        showMiniPlayer();
+        await showMiniPlayer();
         playlistData = viewingPlaylistData;
         currentIdxInPlayList = idx;
         
@@ -1699,6 +1747,7 @@ async function addURLToLiked(url){
 }
 
 async function playViewingPlayList(){
+    updateViewingPlaylist();
     playlistData = viewingPlaylistData;
     console.log("playViewingPlayList", playlistData);
     currentIdxInPlayList = -1;
@@ -1719,9 +1768,6 @@ function setMainProgressBarPercent(percent){
 }
 
 async function timeCal() {
-    // if(currentSongFinished){
-    //     return;
-    // }
     console.log("timeCal is called");
     // preventAutoPlayNextSong = true;
     if(isLoadingNow){
