@@ -73,7 +73,9 @@ playlist_url = "https://www.youtube.com/watch?list={id}"
 song_url = "https://www.youtube.com/watch?v={id}"
 
 
-source = get_yt_music_source('piano')
+
+keyword="蔡依林"
+source = get_yt_music_source(keyword)
 playlist_ids = get_playlist_ids(source)
 # print("playlist_ids=", playlist_ids)
 

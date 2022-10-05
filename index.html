@@ -82,7 +82,7 @@
             <div class="row" style="margin-top: 15px;">
                 <div class="d-flex align-items-center">
                 <div class="col" id="main-player-title-scroll-row">
-                    <div class="d-flex justify-content-start"> <marquee width="300" direction="left" style="color: white;" class="h5 song-name">Title</marquee> </div>
+                    <div class="d-flex justify-content-start"> <marquee width="300" direction="left" style="color: white;" class="h5 song-name">No song is playing</marquee> </div>
                 </div>
 
                 <div class="col-2">
@@ -94,7 +94,7 @@
             </div>
             <div class="row" style="margin-top: -5px;">
                 <div class="d-flex justify-content-start">
-                    <div class="text-muted artist-name" style="font-size: 12px;">Singer</div>
+                    <div class="text-muted artist-name" style="font-size: 12px;">Uploader</div>
                 </div>
             </div>
             <div id="debugInfo" style="color:red"></div>
@@ -408,8 +408,8 @@
                         <img style="height: 45px; width: 45px" class="song-cover" src="https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/best-rap-songs-1583527287.png">
                         <div class="col">
                             <div style="margin-left: 10px;">    
-                        <small style="color: white;" class="d-flex justify-content-left"><marquee width="200" direction="left" style="color: white;" class="song-name">Title</marquee></small>
-                        <small style="color: #999; font-size: smaller;" class="d-flex justify-content-left artist-name">Artist name</small>
+                        <small style="color: white;" class="d-flex justify-content-left"><marquee width="200" direction="left" style="color: white;" class="song-name">No song is playing</marquee></small>
+                        <small style="color: #999; font-size: smaller;" class="d-flex justify-content-left artist-name">no uploader</small>
                     </div>
                     </div>
                     </div>
@@ -419,7 +419,7 @@
 
                     <div class="col">
                         <div class="d-flex justify-content-end" style="margin-bottom: 6px; margin-top: 6px;">
-                            <div style="color: white; margin-top: 10px;" ><i class="fa-solid fa-play fa-xl main-play-btn" id="mini-play-btn"></i></div>
+                            <div style="color: white; margin-top: 10px; margin-right: 16px;" ><i class="fa-solid fa-play fa-xl main-play-btn" id="mini-play-btn"></i></div>
                             <!-- <div style="color: #888; margin-top: 10px; margin-left: 30px;" ><i class="fa-regular fa-heart fa-xl heart-btn"></i></div> -->
                         </div>
                     </div>
@@ -794,7 +794,12 @@ function setupBottomNav(){
 
     $("#float-player-left").on("click", async (e) => {
         // show the main play window
-        await showMainPlayerWindow();
+        if(currentPlayingSongCode){
+            await showMainPlayerWindow();
+        }
+        else{
+            console.log("no songs playing now");
+        }
         avoidFastClick = false;
     });
 
@@ -1242,7 +1247,11 @@ function initProgressBar() {
         //     console.log("disabld on IOS");
         //     return;
         // }
-        console.log("click play")
+        console.log("click play");
+        if(!currentPlayingSongCode){
+            console.log("no playing song");
+            return;
+        }
     if (player1.paused === false) {
         player1.pause();
         isPlaying = false;
