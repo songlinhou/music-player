@@ -13,7 +13,6 @@
         <link href="css/style.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
         <script src="https://kit.fontawesome.com/eb0c496755.js" crossorigin="anonymous"></script>
-        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js"></script>
         <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
@@ -45,6 +44,8 @@
         <script src="src/auth.js"></script>
         <script src="src/store.js"></script>
 
+
+        <script src="swController.js"></script>
         <!-- debugging -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/eruda/2.5.0/eruda.min.js"></script>
 
@@ -675,6 +676,8 @@ $(window).on("load", async function () {
     setupAuth();
     initFirestore();
     fixPlayerResize();
+
+    serviceWorkerInit();
     // getOnlineLikedSongs();
 
     if(showInAppDebug){
