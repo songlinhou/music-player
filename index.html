@@ -1057,6 +1057,7 @@ async function defineLikeButton(){
             }
             let item = playlistData[currentIdxInPlayList];
             await addOneRecordToLikedSongs(item);
+            await addLikedSongsToOnlineStore(item.name, item.code);
             console.log("add to liked songs");
             $(".heart-btn").removeClass("fa-regular");
             $(".heart-btn").addClass("fa-solid");
